@@ -3,15 +3,19 @@ package com.contact.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.contact.entities.User;
 import com.contact.forms.UserForm;
+import com.contact.helper.Message;
+import com.contact.helper.MessageType;
 import com.contact.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @Controller
 public class PageController {
@@ -75,12 +79,18 @@ public class PageController {
   // Procession Register page
 
   @RequestMapping(value = "/do-register", method = RequestMethod.POST)
-  public String processRegister(@ModelAttribute UserForm userForm, HttpSession session) {
+  public String processRegister(@Valid @ModelAttribute UserForm userForm, BindingResult bindingResult,
+      HttpSession session) {
 
     System.out.println(userForm);
     // fetch data from form (creating form class..)
 
     // validate data
+
+    if (bindingResult.hasErrors()) {
+      System.out.println("Error" + bindingResult);
+      return "signup";
+    }
     // save data to database
 
     // User user = User.builder()
@@ -105,7 +115,8 @@ public class PageController {
     System.out.println(savedUser);
     // if any message to show
 
-    session.setAttribute("message", "Registration Successfull !!");
+    Message message = Message.builder().content("Registration Successfull !!").type(MessageType.red).build();
+    session.setAttribute("message", message);
     // redirect to signup page
     return "redirect:/signup";
   }
